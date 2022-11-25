@@ -9,6 +9,7 @@ import java.io.*;
  */
 public class ChatClient {
 	private static Socket clientSocket = null;
+	private static String username;
 	private static ObjectOutputStream outputStrem = null;
 	private static ObjectInputStream inputStream = null;
 	private static BufferedReader input = null;
@@ -50,7 +51,7 @@ public class ChatClient {
 				new Thread(read).start();
 				connectionClose = read.isClosed();
 				while (!connectionClose) {
-					System.out.println("Please enter your command on the next line");
+					//System.out.println("Please enter your command on the next line");
 					outputStrem.writeObject(input.readLine().trim());
 				}
 				
@@ -64,5 +65,9 @@ public class ChatClient {
 				System.err.println("IOException:  " + e);
 			}
 		}
+	}
+
+	public void setUserName(String userName) {
+		this.username = userName;
 	}
 }

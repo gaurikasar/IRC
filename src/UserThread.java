@@ -32,14 +32,12 @@ public class UserThread extends Thread {
 		UserThread[] threads = this.threads;
 
 		try {
-			/*
-			 * Create input and output streams for this client
-			 */
+			//input and output streams for this client
 			is = new ObjectInputStream(clientSocket.getInputStream());
 			os = new ObjectOutputStream(clientSocket.getOutputStream());
 			String name;
 			while (true) {
-				os.writeObject("Enter the desired client name");
+				os.writeObject("Enter your name");
 				try {
 					name = (String)is.readObject();
 					if (name.indexOf('@') == -1) {
@@ -55,7 +53,7 @@ public class UserThread extends Thread {
 			}
 
 			System.out.println("Client " + name + " has joined the chatroom");
-			os.writeObject("Welcome to the chat room " + name + ". To leave, enter </quit> in a new line.");
+			os.writeObject("Welcome to the chat room " + name + ". To exit, type </quit> in a new line.");
 			synchronized (this) {
 				for (int i = 0; i < maxClientsCount; i++) {
 					if (threads[i] != null && threads[i] == this) {
@@ -65,7 +63,7 @@ public class UserThread extends Thread {
 				}
 				for (int i = 0; i < maxClientsCount; i++) {
 					if (threads[i] != null && threads[i] != this) {
-						threads[i].os.writeObject("A new user " + name + " has joined the chat room");
+						threads[i].os.writeObject("Welcome new user " + name + " to the chat room");
 					}
 				}
 			}
@@ -73,30 +71,21 @@ public class UserThread extends Thread {
 			while (true) {
 				String line;
 				try {
+					//Read the client command
+					 line = (String) is.readObject();
 
-					/*
-					 * Reading the user command
-					 */
-
-					line = (String) is.readObject();
-
-					// Quit if user types /quit
+					// manage command to exit the application
 					if (line.startsWith("/quit"))
 					{
 						break;
 					}
 
-					/*
-					 * Handle file transfers
-					 */
-
-					else if (line.startsWith("file"))
+					//Manage file transfers
+					 else if (line.startsWith("file"))
 					{
 						String[] words = line.split("\\s", 4);
-
-						if(words[1].equals("broadcast"))
+						if(words[1].equals("send_all"))
 						{
-
 							if (words.length > 1 && words[2] != null)
 							{
 								words[2] = words[2].trim();
@@ -108,7 +97,7 @@ public class UserThread extends Thread {
 									byte[] buffer = new byte[(int) file.length()];
 									FileInputStream fis = new FileInputStream(file);
 									BufferedInputStream in = new BufferedInputStream(fis);
-									System.out.println("File broadcasted by " + name);
+									System.out.println("File sent by " + name);
 
 									in.read(buffer,0,buffer.length);
 
@@ -117,7 +106,7 @@ public class UserThread extends Thread {
 										for (int i = 0; i < maxClientsCount; i++)
 										{
 											if (threads[i] != null && threads[i].clientName != null && threads[i] != this) {
-												threads[i].os.writeObject("FILE INCOMING");
+												threads[i].os.writeObject("File In Transit....");
 												threads[i].os.writeObject(threads[i].clientName.substring(1));
 												threads[i].os.writeObject(filepath.substring(filepath.lastIndexOf('/') + 1));
 												threads[i].os.write(buffer, 0, buffer.length);
@@ -130,7 +119,7 @@ public class UserThread extends Thread {
 
 						}
 
-						else if(words[1].equals("unicast"))
+						else if(words[1].equals("send_to"))
 						{
 
 							if (words.length > 1 && words[3] != null)
@@ -144,7 +133,7 @@ public class UserThread extends Thread {
 									byte[] buffer = new byte[(int) file.length()];
 									FileInputStream fis = new FileInputStream(file);
 									BufferedInputStream in = new BufferedInputStream(fis);
-									System.out.println("File unicast by " + name +" to " + words[2].substring(1));
+									System.out.println("File sent by " + name +" to " + words[2].substring(1));
 
 									in.read(buffer,0,buffer.length);
 
@@ -155,7 +144,7 @@ public class UserThread extends Thread {
 											if (threads[i] != null && threads[i] != this
 													&& threads[i].clientName != null
 													&& threads[i].clientName.equals(words[2])) {
-												threads[i].os.writeObject("FILE INCOMING");
+												threads[i].os.writeObject("File In Transit....");
 												threads[i].os.writeObject(threads[i].clientName.substring(1));
 												threads[i].os.writeObject(filepath.substring(filepath.lastIndexOf('/') + 1));
 												threads[i].os.write(buffer, 0, buffer.length);
@@ -170,17 +159,16 @@ public class UserThread extends Thread {
 
 					}
 
-					/*
-					 * Handle message transfers
-					 */
+					//Manage message transfers
 
-					else if (line.startsWith("unicast"))
+					//Private messaging:
+					else if (line.startsWith("pvt_msg"))
 					{
 						String[] words = line.split("\\s", 3);
 						if (words.length > 1 && words[2] != null)
 						{
 							words[2] = words[2].trim();
-							System.out.println("Message unicast by " + name + " to " + words[1].substring(1) );
+							System.out.println("Message sent by " + name + " to " + words[1].substring(1) );
 							if (!words[2].isEmpty())
 							{
 								synchronized (this)
@@ -196,7 +184,7 @@ public class UserThread extends Thread {
 											 * Echo this message to let the client know the private
 											 * message was sent
 											 */
-											this.os.writeObject("Private message sent to " + words[1].substring(1));
+											this.os.writeObject("Private message : " + words[1].substring(1));
 											break;
 										}
 									}
@@ -204,7 +192,7 @@ public class UserThread extends Thread {
 							}
 						}
 					}
-
+/*
 					else if (line.startsWith("blockcast"))
 					{
 						String[] words = line.split("\\s", 3);
@@ -230,14 +218,17 @@ public class UserThread extends Thread {
 							}
 						}
 					}
+					*/
 
-					else if (line.startsWith("broadcast"))
+
+					//Public messaging:
+					else if (line.startsWith("pub_msg"))
 					{
 						String[] words = line.split("\\s", 2);
 						if (words.length > 1 && words[1] != null)
 						{
 							words[1] = words[1].trim();
-							System.out.println("Message broadcasted by " + name);
+							System.out.println("Message sent to all by " + name);
 							if (!words[1].isEmpty())
 							{
 								synchronized (this)
@@ -253,58 +244,102 @@ public class UserThread extends Thread {
 						}
 					}
 
+					//manage all the 'room' related commands
 					else if (line.startsWith("room")){
-						System.out.println("Rooms : " + rooms.keySet());
-						String[] words = line.split("\\s", 4);
-						// create room
+						//System.out.println("Rooms : " + rooms.keySet());
+						String[] words = line.split("\\s");
+
+						// create room :
 						if(words[1].equals("create")){
 							String room_name = words[2];
-							System.out.println("Creating room: " + words[2]);
+							System.out.println("Request to create a room : " + words[2]);
 							List<String> client_list = new ArrayList<>();
 							synchronized (this) {
 								for (int i = 0; i < maxClientsCount; i++) {
 									if (threads[i] != null && threads[i].clientName != null && threads[i] == this ) {
 										client_list.add(threads[i].clientName);
 										threads[i].rooms.put(room_name,client_list);
+										threads[i].os.writeObject("New room created : " + room_name);
+
 									}
 								}
 							}
 
 						}
-						// join room
 
-						if(words[1].equals("join")){
+						// join room :
+						if(words[1].equals("join")) {
 							String room_name = words[2];
-							System.out.println("Entering the room :" + words[2]);
-							if(rooms.containsKey(words[2])){
-								System.out.println("Room is available");
+							//System.out.println("Entering the room :" + words[2]);
+							if (rooms.containsKey(words[2])) {
+								System.out.println("Request to join a room :" + room_name);
 								List<String> client_list = rooms.get(words[2]);
 								synchronized (this) {
 									for (int i = 0; i < maxClientsCount; i++) {
-										if (threads[i] != null && threads[i].clientName != null && threads[i] == this ) {
+										if (threads[i] != null && threads[i].clientName != null && threads[i] == this) {
 											client_list.add(threads[i].clientName);
-											threads[i].rooms.put(room_name,client_list);
+											threads[i].rooms.put(room_name, client_list);
+											threads[i].os.writeObject("You have joined the room : " + room_name);
+										}
+									}
+									for (int i = 0; i < maxClientsCount; i++) {
+										if (threads[i] != null && threads[i].clientName != null && threads[i] != this) {
+											if(rooms.get(room_name).contains(threads[i].clientName)) {
+												threads[i].os.writeObject(clientName + " has entered the room : " + room_name);
+											}
+										}
+									}
+								}
+
+							}
+						}
+
+
+						// leave room :
+						if(words[1].equals("leave")) {
+							String room_name = words[2];
+							if (rooms.containsKey(words[2])) {
+								System.out.println("Request to leave a room :" + room_name);
+								List<String> client_list = rooms.get(words[2]);
+								synchronized (this) {
+									for (int i = 0; i < maxClientsCount; i++) {
+										if (threads[i] != null && threads[i].clientName != null && threads[i] == this) {
+											client_list.remove(threads[i].clientName);
+											threads[i].rooms.put(room_name, client_list);
+											threads[i].os.writeObject("You have left the room : " + room_name);
+										}
+									}
+									for (int i = 0; i < maxClientsCount; i++) {
+										if (threads[i] != null && threads[i].clientName != null && threads[i] != this) {
+											if(rooms.get(room_name).contains(threads[i].clientName)) {
+												threads[i].os.writeObject(clientName + " has left the room : " + room_name);
+											}
 										}
 									}
 								}
 							}
-
 						}
 
-
-						// leave room
-						if(words[1].equals("leave"))
+						else if (words[1].equals("chat"))
 						{
 							String room_name = words[2];
-							System.out.println("Entering the room :" + words[2]);
-							if(rooms.containsKey(words[2])){
-								System.out.println("Room is available");
-								List<String> client_list = rooms.get(words[2]);
-								synchronized (this) {
-									for (int i = 0; i < maxClientsCount; i++) {
-										if (threads[i] != null && threads[i].clientName != null && threads[i] == this ) {
-											client_list.remove(threads[i].clientName);
-											threads[i].rooms.put(room_name,client_list);
+
+							if (rooms.containsKey(room_name) && words.length > 1 && words[3] != null)
+							{
+								//get message from the command
+								words[3] = words[3].trim();
+								System.out.println("Message sent to '" + room_name + "' room by " + name);
+								if (!words[3].isEmpty())
+								{
+									synchronized (this)
+									{
+										for (int i = 0; i < maxClientsCount; i++)
+										{
+											if (threads[i] != null && threads[i].clientName != null) {
+												if(rooms.get(room_name).contains(threads[i].clientName)) {
+													threads[i].os.writeObject("message for room '" + room_name + "' : " + words[3]);
+												}
+											}
 										}
 									}
 								}
@@ -321,21 +356,16 @@ public class UserThread extends Thread {
 								}
 							}
 						}
-						// list roomnames
+						// list room names
 						if(words[1].equals("names")){
 							synchronized (this) {
 								for (int i = 0; i < maxClientsCount; i++) {
 									if (threads[i] != null && threads[i].clientName != null && threads[i] == this) {
-										threads[i].os.writeObject(" Rooms available : " + rooms.keySet());
+										threads[i].os.writeObject("Available rooms : " + rooms.keySet());
 									}
 								}
 							}
 						}
-
-
-
-
-
 
 					}
 
@@ -346,7 +376,7 @@ public class UserThread extends Thread {
 
 									for (int j = 0; j < maxClientsCount; j++)
 									{
-										threads[i].os.writeObject("-" + threads[j].clientName);
+										threads[i].os.writeObject("Available users : " + threads[j].clientName);
 									}
 								}
 							}

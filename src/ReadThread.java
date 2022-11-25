@@ -17,41 +17,24 @@ import java.net.*;
  * @author www.codejava.net
  */
 public class ReadThread implements  Runnable {
-    
+
     BufferedReader input;
 	private ObjectInputStream is = null;
 	private boolean closed=false;
-
-	
-   
-
-
 	public boolean isClosed() {
 		return closed;
 	}
-
-
-
-
 	public void setClosed(boolean closed) {
 		this.closed = closed;
 	}
-
-
-
-
 	public ReadThread(BufferedReader inputLine, ObjectInputStream is2) {
 		input=inputLine;
 		is=is2;
 	// TODO Auto-generated constructor stub
 }
-
-
-
-
 	public void run() {
     	String inputResponse;
-		
+
 		try {
 			while ((inputResponse = (String)is.readObject()) != null) {
 
