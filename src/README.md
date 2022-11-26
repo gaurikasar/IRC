@@ -14,10 +14,10 @@ You can run the server using ide or command line.<br />
 To start server using command line type command:<br />
 **command:** java Server \<portnumber>
 
-To start client using command line type command:<br />  
+To start client using command line type command:<br />
 **command:** java Client.
   
-### Exhange messages:
+### Exchange messages:
 
 1. To send private message<br />
    **command:** pvt_msg @clientname \<type message>
@@ -26,24 +26,24 @@ To start client using command line type command:<br />
    **command:** pub_msg \<type message>
 
 3. To send a sercured message to user<br />
-   **command:** secure <key> @clientname \<type message>
+   **command:** secure \<password> @clientname \<type message>
 
-4. To decrypt the key<br />
-   **command:** decrypt <key>
+4. To decrypt the message<br />
+   **command:** decrypt \<password>
  
 ### Room related commands
 
 1. To create a room<br />
-   **command:** room create <room name>
+   **command:** room create \<room_name>
 
 2. To join a room<br />
-   **command:** room join <room name>
+   **command:** room join \<room_name>
 
 3. To leave a room<br />
-   **command:** room leave <room name>
+   **command:** room leave \<room_name>
 
 4. To enlist all members of a room<br />
-   **command:** room members <room name>
+   **command:** room members \<room_name>
 
 5. To enlist all available users<br />
    **command:** enlist_users
