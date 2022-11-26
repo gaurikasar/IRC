@@ -18,7 +18,7 @@ public class ChatClient {
 	public static void main(String[] args) {
 
 		// The default port
-		int portNumber = 2222;
+		int portNumber = 8989;
 		// The default host
 		String host = "localhost";
 		ReadThread read = null;

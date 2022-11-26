@@ -20,14 +20,14 @@ public class ChatServer {
     public static void main(String[] args) {
     	int port = 1002;
         if (args.length < 1) {
-            System.out.println("Server is started at default port" + port);
+            System.out.println("Server started. Default port : " + port);
         }
         else {
         	
         	 port = Integer.valueOf(args[0]).intValue();
         	 System.out.println("Server is started at specified port" + port);
         }
-       
+
  
         try {
 			serverSocket = new ServerSocket(port);

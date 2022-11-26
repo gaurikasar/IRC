@@ -17,6 +17,8 @@ public class UserThread extends Thread {
 	private final UserThread[] threads;
 	private int maxClientsCount;
 	private Map<String,List<String>> rooms;
+	private EncryptionHelper encryptionHelper = new EncryptionHelper();
+	private String formerEncryptedString = "";
 
 
 
@@ -27,6 +29,13 @@ public class UserThread extends Thread {
 		maxClientsCount = threads.length;
 	}
 
+	private String getMessage(String[] array, int startIndex) {
+		String message = "";
+		for(int i=startIndex;i < array.length;++i) {
+			message = message + array[i] + " ";
+		}
+		return message;
+	}
 	public void run() {
 		int maxClientsCount = this.maxClientsCount;
 		UserThread[] threads = this.threads;
@@ -86,6 +95,7 @@ public class UserThread extends Thread {
 						String[] words = line.split("\\s", 4);
 						if(words[1].equals("send_all"))
 						{
+							System.out.println("word array: "+words);
 							if (words.length > 1 && words[2] != null)
 							{
 								words[2] = words[2].trim();
@@ -100,6 +110,8 @@ public class UserThread extends Thread {
 									System.out.println("File sent by " + name);
 
 									in.read(buffer,0,buffer.length);
+									//OutputStream output = clientSocket.getOutputStream();
+									//output.write(buffer, 0, );
 
 									synchronized (this)
 									{
@@ -118,7 +130,7 @@ public class UserThread extends Thread {
 							}
 
 						}
-
+/*
 						else if(words[1].equals("send_to"))
 						{
 
@@ -157,7 +169,11 @@ public class UserThread extends Thread {
 
 						}
 
+ */
+
 					}
+
+
 
 					//Manage message transfers
 
@@ -180,10 +196,6 @@ public class UserThread extends Thread {
 												&& threads[i].clientName.equals(words[1]))
 										{
 											threads[i].os.writeObject("<<" + name + ">> " + words[2]);
-											/*
-											 * Echo this message to let the client know the private
-											 * message was sent
-											 */
 											this.os.writeObject("Private message : " + words[1].substring(1));
 											break;
 										}
@@ -192,34 +204,6 @@ public class UserThread extends Thread {
 							}
 						}
 					}
-/*
-					else if (line.startsWith("blockcast"))
-					{
-						String[] words = line.split("\\s", 3);
-						if (words.length > 1 && words[2] != null)
-						{
-							words[2] = words[2].trim();
-							System.out.println("Message blockcasted by " + name + " excluding " + words[1].substring(1) );
-							if (!words[2].isEmpty())
-							{
-								synchronized (this)
-								{
-									for (int i = 0; i < maxClientsCount; i++)
-									{
-										if (threads[i] != null && threads[i] != this
-												&& threads[i].clientName != null
-												&& !threads[i].clientName.equals(words[1]))
-										{
-											threads[i].os.writeObject("<" + name + "> " + words[2]);
-
-										}
-									}
-								}
-							}
-						}
-					}
-					*/
-
 
 					//Public messaging:
 					else if (line.startsWith("pub_msg"))
@@ -243,6 +227,60 @@ public class UserThread extends Thread {
 							}
 						}
 					}
+
+					else if (line.startsWith("secure")){
+						String[] words = line.split("\\s");
+						if (words.length > 1 && words[2] != null) {
+							//getmessage function converts array to string
+							String msg = getMessage(words,3);
+							String encrypt = encryptionHelper.encrypt(words[1].trim(),msg);
+							System.out.println("Encrypted string : " + encrypt);
+							System.out.println("Secured message sent by " + name + " to " + words[2].substring(1));
+							if (!words[2].isEmpty()) {
+								synchronized (this)
+								{
+									for (int i = 0; i < maxClientsCount; i++)
+									{
+										if (threads[i] != null && threads[i] != this
+												&& threads[i].clientName != null
+												&& threads[i].clientName.equals(words[2]))
+										{
+											threads[i].formerEncryptedString = encrypt;
+											System.out.println("encrypted code :" + encrypt);
+											threads[i].os.writeObject("<<" + name + ">> " + encrypt);
+											threads[i].os.writeObject("<<system>> To decrypt this message use command:  decrypt <password>");
+											this.os.writeObject("Secured message sent to " + words[2].substring(1));
+											break;
+										}
+									}
+								}
+
+							}
+						}
+					}
+
+
+					else if (line.startsWith("decrypt")) {
+						String[] words = line.split("\\s", 2);
+						if (words.length > 1 && words[1] != null) {
+							synchronized (this) {
+								for (int i = 0; i < maxClientsCount; i++) {
+									if (threads[i] != null && threads[i] == this) {
+										if (threads[i].formerEncryptedString == "") {
+											threads[i].os.writeObject("<<system>> No messages to decrypt!");
+										}
+										else {
+											String decryptedMsg = encryptionHelper.decrypt(words[1].trim(),threads[i].formerEncryptedString);
+											threads[i].formerEncryptedString = "";
+											threads[i].os.writeObject("<<system>> "+ decryptedMsg);
+										}
+										break;
+									}
+								}
+							}
+						}
+					}
+
 
 					//manage all the 'room' related commands
 					else if (line.startsWith("room")){
