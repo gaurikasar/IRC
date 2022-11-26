@@ -18,6 +18,7 @@ To start client using command line type command:<br />
 **command:** java Client.
 
 ### Get help:
+1. To get help<br \>
    **command:** help
   
 ### Exchange messages:
@@ -54,7 +55,7 @@ To start client using command line type command:<br />
 6. To enlist all the rooms available<br />
    **command:** room names
    
-7. To send message to a room<br \> 
+7. To send message to a room<br \>
    **command:** room chat <type message> 
 
 
