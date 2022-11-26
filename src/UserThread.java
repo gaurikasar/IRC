@@ -407,6 +407,28 @@ public class UserThread extends Thread {
 
 					}
 
+					else if(line.startsWith("help")){
+						synchronized (this) {
+							for (int i = 0; i < maxClientsCount; i++) {
+								if (threads[i] != null && threads[i].clientName != null && threads[i] == this) {
+											threads[i].os.writeObject("HELP: \n" +
+												"To create room:                 room create <room_name> \n\n" +
+												"To join room:                   room join <room_name> \n\n" +
+												"To leave room:                  room leave <room_name> \n\n" +
+												"To enlist all room members:     room members <room_name> \n\n" +
+												"To enlist all available users : enlist_users \n\n" +
+												"To enlist all available rooms : room names \n\n" +
+												"To send message to a room:      room chat <type message> \n\n" +
+												"To send a private message:      pvt_msg @clientname <type message> \n\n" +
+												"To send a public message :      pub_msg @clientname <type message> \n\n" +
+												"To send a secure message :      secure <password> @clientname <typemessage> \n\n" +
+												"To decrypt the secure message:  dycrypt <password> \n\n");
+								}
+							}
+						}
+					}
+
+
 					else if (line.startsWith("enlist_users")) {
 						synchronized (this) {
 							for (int i = 0; i < maxClientsCount; i++) {
