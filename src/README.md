@@ -8,14 +8,17 @@ This project covers functionalities related to the communication between client 
 ## Usage of functionality:
 
 ### Initiate server and clients
-The server is initiated at port 8989 by default.
+The server is initiated at port 1002 by default.
 
 You can run the server using ide or command line.<br />
-To start server using command line type command:<br />
-**command:** java Server \<portnumber>
+Using a default port:<br />
+**command:** java Server \<portnumber><br />
+**command:** java Client.<br />
 
-To start client using command line type command:<br />
-**command:** java Client.
+Using a different port:<br />
+**command:** java Server \<portnumber><br />
+**command:** java Client localhost \<portnumber><br />
+
 
 ### Get help:
 1. To get help<br />
@@ -56,6 +59,6 @@ To start client using command line type command:<br />
    **command:** room names
    
 7. To send message to a room<br />
-   **command:** room chat <type message> 
+   **command:** room chat \<room name> \<type message> 
 
 
