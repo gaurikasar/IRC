@@ -12,8 +12,8 @@ The server is initiated at port 1002 by default.
 
 You can run the server using ide or command line.<br />
 Using a default port:<br />
-**command:** java Server \<portnumber><br />
-**command:** java Client.<br />
+**command:** java Server <br />
+**command:** java Client <br />
 
 Using a different port:<br />
 **command:** java Server \<portnumber><br />
