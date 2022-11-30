@@ -6,6 +6,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 
+/**
+ *Class
+ * Handles Encryption
+ * Encryption Algorithm used is AES-SHA-256
+ *
+ * */
+
+
+
 public class EncryptionHelper {
     private static String ALGORITHM = "AES";
     private static String SHA = "SHA-256";

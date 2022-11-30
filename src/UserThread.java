@@ -3,10 +3,9 @@ import java.net.*;
 import java.util.*;
  
 /**
- * This thread handles connection for each connected client, so the server
+ * This thread is responsible for handling connection for each connected client, so the server
  * can handle multiple clients at the same time.
  *
- * @author www.codejava.net
  */
 public class UserThread extends Thread {
 
@@ -88,92 +87,6 @@ public class UserThread extends Thread {
 					{
 						break;
 					}
-
-					//Manage file transfers
-					 else if (line.startsWith("file"))
-					{
-						String[] words = line.split("\\s", 4);
-						if(words[1].equals("send_all"))
-						{
-							System.out.println("word array: "+words);
-							if (words.length > 1 && words[2] != null)
-							{
-								words[2] = words[2].trim();
-								if (!words[2].isEmpty())
-								{
-
-									String filepath = words[2];
-									File file = new File(filepath);
-									byte[] buffer = new byte[(int) file.length()];
-									FileInputStream fis = new FileInputStream(file);
-									BufferedInputStream in = new BufferedInputStream(fis);
-									System.out.println("File sent by " + name);
-
-									in.read(buffer,0,buffer.length);
-									//OutputStream output = clientSocket.getOutputStream();
-									//output.write(buffer, 0, );
-
-									synchronized (this)
-									{
-										for (int i = 0; i < maxClientsCount; i++)
-										{
-											if (threads[i] != null && threads[i].clientName != null && threads[i] != this) {
-												threads[i].os.writeObject("File In Transit....");
-												threads[i].os.writeObject(threads[i].clientName.substring(1));
-												threads[i].os.writeObject(filepath.substring(filepath.lastIndexOf('/') + 1));
-												threads[i].os.write(buffer, 0, buffer.length);
-												threads[i].os.flush();
-											}
-										}
-									}
-								}
-							}
-
-						}
-/*
-						else if(words[1].equals("send_to"))
-						{
-
-							if (words.length > 1 && words[3] != null)
-							{
-								words[3] = words[3].trim();
-								if (!words[3].isEmpty())
-								{
-
-									String filepath = words[3];
-									File file = new File(filepath);
-									byte[] buffer = new byte[(int) file.length()];
-									FileInputStream fis = new FileInputStream(file);
-									BufferedInputStream in = new BufferedInputStream(fis);
-									System.out.println("File sent by " + name +" to " + words[2].substring(1));
-
-									in.read(buffer,0,buffer.length);
-
-									synchronized (this)
-									{
-										for (int i = 0; i < maxClientsCount; i++)
-										{
-											if (threads[i] != null && threads[i] != this
-													&& threads[i].clientName != null
-													&& threads[i].clientName.equals(words[2])) {
-												threads[i].os.writeObject("File In Transit....");
-												threads[i].os.writeObject(threads[i].clientName.substring(1));
-												threads[i].os.writeObject(filepath.substring(filepath.lastIndexOf('/') + 1));
-												threads[i].os.write(buffer, 0, buffer.length);
-												threads[i].os.flush();
-											}
-										}
-									}
-								}
-							}
-
-						}
-
- */
-
-					}
-
-
 
 					//Manage message transfers
 
@@ -365,7 +278,7 @@ public class UserThread extends Thread {
 							if (rooms.containsKey(room_name) && words.length > 1 && words[3] != null)
 							{
 								//get message from the command
-								words[3] = words[3].trim();
+								String msg = getMessage(words,3);
 								System.out.println("Message sent to '" + room_name + "' room by " + name);
 								if (!words[3].isEmpty())
 								{
@@ -375,7 +288,7 @@ public class UserThread extends Thread {
 										{
 											if (threads[i] != null && threads[i].clientName != null) {
 												if(rooms.get(room_name).contains(threads[i].clientName)) {
-													threads[i].os.writeObject("message for room '" + room_name + "' : " + words[3]);
+													threads[i].os.writeObject("message for room '" + room_name + "' : " + msg);
 												}
 											}
 										}
@@ -422,12 +335,11 @@ public class UserThread extends Thread {
 												"To send a private message:      pvt_msg @clientname <type message> \n\n" +
 												"To send a public message :      pub_msg @clientname <type message> \n\n" +
 												"To send a secure message :      secure <password> @clientname <typemessage> \n\n" +
-												"To decrypt the secure message:  dycrypt <password> \n\n");
+												"To decrypt the secure message:  decrypt <password> \n\n");
 								}
 							}
 						}
 					}
-
 
 					else if (line.startsWith("enlist_users")) {
 						synchronized (this) {
@@ -436,12 +348,23 @@ public class UserThread extends Thread {
 
 									for (int j = 0; j < maxClientsCount; j++)
 									{
-										threads[i].os.writeObject("Available users : " + threads[j].clientName);
+										if (threads[j] != null && threads[j].clientName != null) {
+											threads[i].os.writeObject("Available users : " + threads[j].clientName);
+										}
 									}
 								}
 							}
 						}
 					}
+
+					synchronized (this) {
+						for (int i = 0; i < maxClientsCount; i++) {
+							if (threads[i] != null && threads[i].clientName != null && threads[i] == this) {
+										threads[i].os.writeObject("Please enter command on the next line:");
+							}
+						}
+					}
+
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

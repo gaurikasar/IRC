@@ -5,9 +5,12 @@ import java.net.*;
 import java.util.*;
  
 /**
- * This is the chat server program.
- * Press Ctrl + C to terminate the program.
- * @author www.codejava.net
+ * Class
+ * Handles server process
+ * Accepts client connection
+ * provides shared memory
+ * Manages usertheads
+ *
  */
 public class ChatServer {
     private static final int totalClientsCount = 20;

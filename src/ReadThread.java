@@ -10,13 +10,12 @@ import java.io.ObjectInputStream;
 import java.net.*;
  
 /**
- * This thread is responsible for reading server's input and printing it
- * to the console.
- * It runs in an infinite loop until the client disconnects from the server.
+ * Thread
+ * read input from server and print it on console
+ * Infinite while loop to run until client disconnected from server
  *
- * @author www.codejava.net
  */
-public class ReadThread implements  Runnable {
+public class ReadThread extends  Thread {
 
     BufferedReader input;
 	private ObjectInputStream is = null;
@@ -30,67 +29,20 @@ public class ReadThread implements  Runnable {
 	public ReadThread(BufferedReader inputLine, ObjectInputStream is2) {
 		input=inputLine;
 		is=is2;
-	// TODO Auto-generated constructor stub
 }
 	public void run() {
     	String inputResponse;
 
 		try {
 			while ((inputResponse = (String)is.readObject()) != null) {
-
-				if(inputResponse.equals("FILE INCOMING")){
-					String cname = (String)is.readObject();
-					String filename = (String)is.readObject();
-
-					int test = is.read();
-					while(test!=-1)
-					{
-
-						int size = 8096;
-						int byteread;
-
-						byte[] buffer = new byte[size];
-						File f = new File(cname + "/" +filename);
-						if(!f.getParentFile().exists()){
-							f.getParentFile().mkdirs();
-						}
-
-						try {
-							f.createNewFile();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
-						File file = new File(f.getParentFile(), f.getName());
-						System.out.println("The file " + filename + " has been received");
-						try {
-							FileOutputStream fos = new FileOutputStream(file);
-							BufferedOutputStream out = new BufferedOutputStream(fos);
-							while ((byteread = is.read(buffer, 0, buffer.length)) != -1) {
-								out.write(buffer, 0, byteread);
-								out.flush();
-							}
-
-							fos.close();
-							out.close();
-
-							break;
-						} catch(Exception e) {
-							System.out.println("Exception: " +e);
-						}
-
-
-					}
-				}
-
-				else {
 					System.out.println(inputResponse);
 					if (inputResponse.indexOf("~ Bye") != -1)
 						break;
-				}
 			}
 			closed = true;
+			System.out.println("Exiting......");
 		} catch (IOException e) {
+			closed = true;
 			System.err.println("IOException:  " + e);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

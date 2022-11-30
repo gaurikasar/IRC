@@ -2,15 +2,14 @@ import java.net.*;
 import java.io.*;
  
 /**
- * This is the chat client program.
- * Type 'bye' to terminte the program.
- *
- * @author www.codejava.net
+*Class
+ * Initiates socket for connection
+ * Sends request to the server
  */
 public class ChatClient {
 	private static Socket clientSocket = null;
 	private static String username;
-	private static ObjectOutputStream outputStrem = null;
+	private static ObjectOutputStream outputStream = null;
 	private static ObjectInputStream inputStream = null;
 	private static BufferedReader input = null;
 	private static boolean connectionClose = false;
@@ -18,7 +17,7 @@ public class ChatClient {
 	public static void main(String[] args) {
 
 		// The default port
-		int portNumber = 8989;
+		int portNumber = 1002;
 		// The default host
 		String host = "localhost";
 		ReadThread read = null;
@@ -36,7 +35,7 @@ public class ChatClient {
 		try {
 			clientSocket = new Socket(host, portNumber);
 			input = new BufferedReader(new InputStreamReader(System.in));
-			outputStrem = new ObjectOutputStream(clientSocket.getOutputStream());
+			outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 			inputStream = new ObjectInputStream(clientSocket.getInputStream());
 			read = new ReadThread(input, inputStream);
 		} catch (UnknownHostException e) {
@@ -46,19 +45,20 @@ public class ChatClient {
 					+ host);
 		}
 
-		if (clientSocket != null && outputStrem != null && inputStream != null) {
+		if (clientSocket != null && outputStream != null && inputStream != null) {
 			try {
-				new Thread(read).start();
-				connectionClose = read.isClosed();
-				while (!connectionClose) {
-					//System.out.println("Please enter your command on the next line");
-					outputStrem.writeObject(input.readLine().trim());
+				Runtime.getRuntime().addShutdownHook(new ShutDownHook(inputStream,outputStream,clientSocket));
+				read.start();
+				while (!read.isClosed()) {
+					outputStream.writeObject(input.readLine().trim());
 				}
+				System.out.println("Outside while loop");
+				outputStream.writeObject("/quit");
 				
 				/*
 				 * Close the output stream, input stream and the socket
 				 */
-				outputStrem.close();
+				outputStream.close();
 				inputStream.close();
 				clientSocket.close();
 			} catch (IOException e) {
