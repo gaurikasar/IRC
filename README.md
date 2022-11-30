@@ -56,6 +56,6 @@ To start client using command line type command:<br />
    **command:** room names
    
 7. To send message to a room<br />
-   **command:** room chat \<type message> 
+   **command:** room chat \<room name> \<type message> 
 
 
