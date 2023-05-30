@@ -1,5 +1,5 @@
 **Project:** Internet Relay Chat<br />
-**Group Members:** Shruti Deshmukh, Gauri Kanchar 
+**Group Members:** Shruti Deshmukh, Gauri Kasar 
 
 # Introduction:
 This is the final project for "Internetworking Protocol" class for fall 2022. <br />
